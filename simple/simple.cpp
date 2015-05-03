@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 	//unvectorized, unparallelized
 	for (int i = 0; i < iters; i++) {
 		for (int j = 0; j < size; j++) {
-			solu[i] = nums[0][i] * nums[1][i];
+			solu[j] = nums[0][j] * nums[1][j];
 		}
 	}
 
@@ -89,8 +89,8 @@ int main(int argc, char *argv[]) {
 	#pragma omp parallel for num_threads(num_procs)
 	for (int i = 0; i < iters; i++) {
 		for (int j = 0; j < size; j++) {
-	 		solu[i] = nums[0][i] * nums[1][i];
-	 	}
+			solu[j] = nums[0][j] * nums[1][j];
+		}
 	}
 
 	gettimeofday (&tc, NULL);
@@ -113,10 +113,11 @@ int main(int argc, char *argv[]) {
 	//unvectorized, parallelized + ompSIMD
 	#pragma omp parallel for num_threads(num_procs)
 	for (int i = 0; i < iters; i++) {
-		#pragma omp simd //not sure if this is correct usage (does very little)
+		//not sure if this is correct usage (does very little) (unknown???)
+		//#pragma omp simd //doesnt do anything.... :(
 		for (int j = 0; j < size; j++) {
-	 		solu[i] = nums[0][i] * nums[1][i];
-	 	}
+			solu[j] = nums[0][j] * nums[1][j];
+		}
 	}
 
 	gettimeofday (&tf, NULL);
@@ -147,13 +148,12 @@ int main(int argc, char *argv[]) {
 	printf("speedup(w/parr):%f\n", time_temp[0] / time_temp[1]);
 	printf("speedup(w/vect+parr):%f\n", time_temp[0] / time_temp[3]);
 
-	puts("");
+	// puts("");
+	// timeval_subtract(&tresult, &tf, &te);
+	// printf("vectorized(omp) parallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
+	// time_temp[4] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
 
-	timeval_subtract(&tresult, &tf, &te);
-	printf("vectorized(omp) parallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
-	time_temp[4] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
-
-	printf("speedup(w/omp parr+simd):%f\n", time_temp[0] / time_temp[4]);
+	// printf("speedup(w/omp parr+simd):%f\n", time_temp[0] / time_temp[4]);
 
 
 	// write solution to output file
