@@ -125,11 +125,11 @@ int main(int argc, char *argv[]) {
 	time_temp[1] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
 
 	timeval_subtract(&tresult, &td, &tc);
-	printf("vectorized unparallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
+	printf("vectorized   unparallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
 	time_temp[2] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
 
 	timeval_subtract(&tresult, &te, &td);
-	printf("vectorized parallelized\t\tsec:%lu;micro:%lu;\n\n", tresult.tv_sec, tresult.tv_usec);
+	printf("vectorized   parallelized\tsec:%lu;micro:%lu;\n\n", tresult.tv_sec, tresult.tv_usec);
 	time_temp[3] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
 
 	printf("speedup(w/vect):%f\n", time_temp[0] / time_temp[2]);
