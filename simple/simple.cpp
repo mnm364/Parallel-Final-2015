@@ -6,6 +6,12 @@
 #include <fstream>
 #include <string>
 
+#include "simple_ispc.h"
+
+using namespace ispc;
+
+//extern void simple_ispc(int size, int*, int*, int*);
+
 // measure time
 int timeval_subtract (struct timeval * result, struct timeval * x, struct timeval * y)
 {
@@ -42,32 +48,33 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// allocate mem for input arrays
-	unsigned int **nums = (unsigned int**) malloc(2 * sizeof(unsigned int*));
+	int **nums = (int**) malloc(2 * sizeof(int*));
 
 	std::fstream input[2];
 	for (int i = 0; i < 2; i++) {
 		std::string filename = "io/rand0" + std::to_string(i + 1) + ".txt";
 		input[i].open(filename, std::ios::in);
 
-		nums[i] = (unsigned int*) malloc(size * sizeof(unsigned int));
+		nums[i] = (int*) malloc(size * sizeof(unsigned int));
 		for (int j = 0; j < size; j++) {
 			input[i] >> nums[i][j];
 		}
 	}
 
 	// allocate mem for solution array
-	unsigned int *solu = (unsigned int*) malloc(size * sizeof(int));
+	int *solu = (int*) malloc(size * sizeof(unsigned int));
 
 	// start time counter
 	struct timeval ta, tb, tresult;
 	gettimeofday (&ta, NULL);
 
 	// transformation step
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < 250; j++) {
-			solu[i] = nums[0][i] * nums[1][i];
-		}
-	}
+	simple_ispc(size, nums[0], nums[1], solu);
+	// for (int i = 0; i < size; i++) {
+	// 	for (int j = 0; j < 250; j++) {
+	// 		solu[i] = nums[0][i] * nums[1][i];
+	// 	}
+	// }
 
 	// end time counter
 	gettimeofday (&tb, NULL);
