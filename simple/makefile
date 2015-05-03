@@ -1,5 +1,5 @@
 CPP = g++ -m64
-CPPFLAGS=-std=c++11 -Iobjs/ -Wall -Wextra -pedantic -g
+CPPFLAGS=-std=c++11 -fopenmp -Iobjs/ -Wall -Wextra -pedantic -g
 ISPC=ispc
 ISPCFLAGS=--arch=x86-64 --target=sse4
 ISPCASM = --emit-asm
@@ -26,4 +26,4 @@ objs/%_ispc.h objs/%_ispc.o: %.ispc
 	$(ISPC) $(ISPCFLAGS) $< -o objs/$*_ispc.o -h objs/$*_ispc.h
 
 serial: simple_serial.cpp
-	$(CPP) $(CPPFLAGS) $< -o $@ -O0
+	$(CPP) $(CPPFLAGS) $< -o $@ -O3
