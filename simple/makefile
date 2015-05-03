@@ -1,5 +1,5 @@
 CPP = g++ -m64
-CPPFLAGS=-std=c++11 -fopenmp -Iobjs/ -Wall -Wextra -pedantic -g
+CPPFLAGS=-std=c++11 -Iobjs/ -Wall -Wextra -pedantic -g -fopenmp -openmp-simd
 ISPC=ispc
 ISPCFLAGS=--arch=x86-64 --target=sse4
 ISPCASM = --emit-asm

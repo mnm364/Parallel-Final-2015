@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	int num_procs = omp_get_num_procs();
 
 	// start time counter
-	struct timeval ta, tb, tc, td, te, tresult;
+	struct timeval ta, tb, tc, td, te, tf, tresult;
 
 	gettimeofday (&ta, NULL);
 
@@ -95,14 +95,14 @@ int main(int argc, char *argv[]) {
 
 	gettimeofday (&tc, NULL);
 
-	// vectorized, unparallelized
+	// vectorized(ispc), unparallelized
 	for (int i = 0; i < iters; i++) {
 			ispc::simple_ispc(size, nums[0], nums[1], solu);
 	}
 
 	gettimeofday (&td, NULL);
 
-	// vectorized, parallelized
+	// vectorized(ispc), parallelized
 	#pragma omp parallel for num_threads(num_procs)
 	for (int i = 0; i < iters; i++) {
 			ispc::simple_ispc(size, nums[0], nums[1], solu);
@@ -110,11 +110,22 @@ int main(int argc, char *argv[]) {
 
 	gettimeofday (&te, NULL);
 
+	//unvectorized, parallelized + ompSIMD
+	#pragma omp parallel for num_threads(num_procs)
+	for (int i = 0; i < iters; i++) {
+		#pragma omp simd //not sure if this is correct usage (does very little)
+		for (int j = 0; j < size; j++) {
+	 		solu[i] = nums[0][i] * nums[1][i];
+	 	}
+	}
+
+	gettimeofday (&tf, NULL);
+
 	// output
 	printf("calcs:%d\n",size*iters);
 	printf("num_procs:%d (maybe hyperthreading cores)\n", num_procs);
 
-	double time_temp[4];
+	double time_temp[5];
 
 	timeval_subtract(&tresult, &tb, &ta);
 	printf("unvectorized unparallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
@@ -125,16 +136,25 @@ int main(int argc, char *argv[]) {
 	time_temp[1] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
 
 	timeval_subtract(&tresult, &td, &tc);
-	printf("vectorized   unparallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
+	printf("vectorized(ispc) unparallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
 	time_temp[2] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
 
 	timeval_subtract(&tresult, &te, &td);
-	printf("vectorized   parallelized\tsec:%lu;micro:%lu;\n\n", tresult.tv_sec, tresult.tv_usec);
+	printf("vectorized(ispc) parallelized\tsec:%lu;micro:%lu;\n\n", tresult.tv_sec, tresult.tv_usec);
 	time_temp[3] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
 
 	printf("speedup(w/vect):%f\n", time_temp[0] / time_temp[2]);
 	printf("speedup(w/parr):%f\n", time_temp[0] / time_temp[1]);
 	printf("speedup(w/vect+parr):%f\n", time_temp[0] / time_temp[3]);
+
+	puts("");
+
+	timeval_subtract(&tresult, &tf, &te);
+	printf("vectorized(omp) parallelized\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
+	time_temp[4] = (tresult.tv_sec * 1000000) + tresult.tv_usec;
+
+	printf("speedup(w/omp parr+simd):%f\n", time_temp[0] / time_temp[4]);
+
 
 	// write solution to output file
 	std::fstream output;
