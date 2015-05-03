@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 	// transformation step
 	for (int i = 0; i < 200; i++) {
 		for (int j = 0; j < size; j++) {
-			solu[j] = nums[0][j] + nums[1][j];
+			solu[j] = nums[0][j] * nums[1][j];
 		}
 	}
 
