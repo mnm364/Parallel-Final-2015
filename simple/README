@@ -11,3 +11,5 @@ The following files are contained within this submission:
     io/rand01.txt : 1,000,000 random numbers
     io/rand02.txt : 1,000,000 different random numbers
     makefile : makefile
+
+Our project depends on the ISPC library. We have included it in the tar.
