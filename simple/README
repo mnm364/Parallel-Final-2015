@@ -1,3 +1,4 @@
+Michael Miller and Christian Reotutar
 This is the final project for Parallel Programming (600.420) Spring 2015.
 
 Our goal for this project was to find the parallelism possible from
@@ -13,3 +14,13 @@ The following files are contained within this submission:
     makefile : makefile
 
 Our project depends on the ISPC library. We have included it in the tar.
+In order to run our project run the following commands
+    make : compile the simple program to test times and speedup
+    make serial : compile the serial program with O3 optimizations
+    make clean : clean
+    make disa : a special surprise
+    ./simple 1000 : run the simple program with a high enough number 
+        of iterations for reliability
+    ./serial 1000 : run the optimized serial program with a high enough
+        number of iterations for reliability
+
