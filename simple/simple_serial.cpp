@@ -32,40 +32,44 @@ int timeval_subtract (struct timeval * result, struct timeval * x, struct timeva
 
 int main(int argc, char *argv[]) {
 
-	int size;
+	int size = 1000000;
+	int iters;
 
 	if (argc != 2) {
-		std::cout << "ERROR in cmd args" << std::endl;
+		std::cout << "usage: ./serial <dataset multiplier>" << std::endl;
 		return 1;
 	} else {
-		size = atoi(argv[1]);
+		iters = atoi(argv[1]);
 	}
 	
 	// allocate mem for input arrays
-	int **nums = (int**) malloc(2 * sizeof(int*));
+	unsigned int **nums = (unsigned int**) malloc(2 * sizeof(unsigned int*));
 
 	std::fstream input[2];
 	for (int i = 0; i < 2; i++) {
 		std::string filename = "io/rand0" + std::to_string(i + 1) + ".txt";
 		input[i].open(filename, std::ios::in);
 
-		nums[i] = (int*) malloc(size * sizeof(unsigned int));
+		nums[i] = (unsigned int*) malloc(size * sizeof(unsigned int));
 		for (int j = 0; j < size; j++) {
 			input[i] >> nums[i][j];
 		}
 	}
 
 	// allocate mem for solution array
-	int *solu = (int*) malloc(size * sizeof(unsigned int));
+	unsigned int **solu = (unsigned int**) malloc(iters * sizeof(unsigned int*));
+	for (int i = 0; i < iters; i++) {
+		solu[i] = (unsigned int*) malloc(size * sizeof(unsigned int));
+	}
 
 	// start time counter
 	struct timeval ta, tb, tresult;
 	gettimeofday (&ta, NULL);
 
 	// transformation step
-	for (int i = 0; i < 200; i++) {
+	for (int i = 0; i < iters; i++) {
 		for (int j = 0; j < size; j++) {
-			solu[j] = nums[0][j] * nums[1][j];
+			solu[i][j] = nums[0][j] * nums[1][j];
 		}
 	}
 
@@ -74,13 +78,13 @@ int main(int argc, char *argv[]) {
 	timeval_subtract ( &tresult, &tb, &ta );
 
 	//time output
-	printf ("sec:%lu;\nmicro:%lu;\nlen:%d;\n", tresult.tv_sec, tresult.tv_usec, size);
+	printf ("serial(-O3)\tsec:%lu;micro:%lu;\n", tresult.tv_sec, tresult.tv_usec);
 
-	std::fstream output;
-	output.open("io/out_serial.txt", std::ios::out | std::ios::trunc);
-	for (int i = 0; i < size; i++) {
-		output << solu[i] << std::endl;
-	}
+	// std::fstream output;
+	// output.open("io/out_serial.txt", std::ios::out | std::ios::trunc);
+	// for (int i = 0; i < size; i++) {
+	// 	output << solu[i] << std::endl;
+	// }
 
 	return 0;
 }

@@ -9,7 +9,7 @@
 
 #include "simple_ispc.h"
 
-extern void simple_ispc(int size, int* ar1, int* ar2, int* sol);
+extern void simple_ispc(unsigned int size, unsigned int* ar1, unsigned int* ar2, unsigned int* sol);
 
 // calculate elapsed time
 int timeval_subtract (struct timeval * result, struct timeval * x, struct timeval * y)
@@ -37,19 +37,18 @@ int timeval_subtract (struct timeval * result, struct timeval * x, struct timeva
 
 int main(int argc, char *argv[]) {
 
-	int size;
+	int size = 1000000;
 	int iters;
 
-	if (argc != 3) {
-		std::cout << "usage: ./simple <number iters> <dataset size>" << std::endl;
+	if (argc != 2) {
+		std::cout << "usage: ./simple <dataset multiple>" << std::endl;
 		return 1;
 	} else {
 		iters = atoi(argv[1]);
-		size = atoi(argv[2]);
 	}
 
 	// allocate mem for input arrays
-	int **nums = (int**) malloc(2 * sizeof(int*));
+	unsigned int **nums = (unsigned int**) malloc(2 * sizeof(unsigned int*));
 
 	// load input from file into array
 	std::fstream input[2];
@@ -57,7 +56,7 @@ int main(int argc, char *argv[]) {
 		std::string filename = "io/rand0" + std::to_string(i + 1) + ".txt";
 		input[i].open(filename, std::ios::in);
 
-		nums[i] = (int*) malloc(size * sizeof(unsigned int));
+		nums[i] = (unsigned int*) malloc(size * sizeof(unsigned int));
 		for (int j = 0; j < size; j++) {
 			input[i] >> nums[i][j];
 		}
@@ -66,7 +65,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	// allocate mem for solution array
-	int *solu = (int*) malloc(size * sizeof(unsigned int));
+	unsigned int **solu = (unsigned int**) malloc(iters * sizeof(unsigned int*));
+	for (int i = 0; i < iters; i++) {
+		solu[i] = (unsigned int*) malloc(size * sizeof(unsigned int));
+	}
 
 	// determine number of threads to create
 	int num_procs = omp_get_num_procs();
@@ -79,7 +81,7 @@ int main(int argc, char *argv[]) {
 	//unvectorized, unparallelized
 	for (int i = 0; i < iters; i++) {
 		for (int j = 0; j < size; j++) {
-			solu[j] = nums[0][j] * nums[1][j];
+			solu[i][j] = nums[0][j] * nums[1][j];
 		}
 	}
 
@@ -89,7 +91,7 @@ int main(int argc, char *argv[]) {
 	#pragma omp parallel for num_threads(num_procs)
 	for (int i = 0; i < iters; i++) {
 		for (int j = 0; j < size; j++) {
-			solu[j] = nums[0][j] * nums[1][j];
+			solu[i][j] = nums[0][j] * nums[1][j];
 		}
 	}
 
@@ -97,7 +99,7 @@ int main(int argc, char *argv[]) {
 
 	// vectorized(ispc), unparallelized
 	for (int i = 0; i < iters; i++) {
-			ispc::simple_ispc(size, nums[0], nums[1], solu);
+			ispc::simple_ispc(size, nums[0], nums[1], solu[i]);
 	}
 
 	gettimeofday (&td, NULL);
@@ -105,20 +107,20 @@ int main(int argc, char *argv[]) {
 	// vectorized(ispc), parallelized
 	#pragma omp parallel for num_threads(num_procs)
 	for (int i = 0; i < iters; i++) {
-			ispc::simple_ispc(size, nums[0], nums[1], solu);
+			ispc::simple_ispc(size, nums[0], nums[1], solu[i]);
 	}
 
 	gettimeofday (&te, NULL);
 
-	//unvectorized, parallelized + ompSIMD
-	#pragma omp parallel for num_threads(num_procs)
-	for (int i = 0; i < iters; i++) {
-		//not sure if this is correct usage (does very little) (unknown???)
-		//#pragma omp simd //doesnt do anything.... :(
-		for (int j = 0; j < size; j++) {
-			solu[j] = nums[0][j] * nums[1][j];
-		}
-	}
+	// //unvectorized, parallelized + ompSIMD
+	// #pragma omp parallel for num_threads(num_procs)
+	// for (int i = 0; i < iters; i++) {
+	// 	//not sure if this is correct usage (does very little) (unknown???)
+	// 	//#pragma omp simd //doesnt do anything.... :(
+	// 	for (int j = 0; j < size; j++) {
+	// 		solu[j] = nums[0][j] * nums[1][j];
+	// 	}
+	// }
 
 	gettimeofday (&tf, NULL);
 
@@ -156,13 +158,13 @@ int main(int argc, char *argv[]) {
 	// printf("speedup(w/omp parr+simd):%f\n", time_temp[0] / time_temp[4]);
 
 
-	// write solution to output file
-	std::fstream output;
-	output.open("io/out_serial.txt", std::ios::out | std::ios::trunc);
-	for (int i = 0; i < size; i++) {
-		output << solu[i] << std::endl;
-	}
-	output.close();
+	// // write solution to output file
+	// std::fstream output;
+	// output.open("io/out_serial.txt", std::ios::out | std::ios::trunc);
+	// for (int i = 0; i < size; i++) {
+	// 	output << solu[i] << std::endl;
+	// }
+	// output.close();
 
 	// exit successfully
 	return 0;
