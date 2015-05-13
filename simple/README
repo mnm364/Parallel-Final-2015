@@ -1,0 +1,13 @@
+This is the final project for Parallel Programming (600.420) Spring 2015.
+
+Our goal for this project was to find the parallelism possible from
+the Intel SPMD Program Compiler available in a lower-level functional
+units instead of parallelism through cores (OpenMP) and machines (MPI).
+
+The following files are contained within this submission:
+    simple.cpp : Driver class with serial implementation of our tests
+    simple.ispc : ISPC parallelized implementation of our tests
+    random.cpp : Creates random numbers in a text file
+    io/rand01.txt : 1,000,000 random numbers
+    io/rand02.txt : 1,000,000 different random numbers
+    makefile : makefile
