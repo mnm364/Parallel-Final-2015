@@ -1,8 +1,10 @@
-Michael Miller and Christian Reotutar
+Michael Miller
+Christian Reotutar
+
 This is the final project for Parallel Programming (600.420) Spring 2015.
 
 Our goal for this project was to find the parallelism possible from
-the Intel SPMD Program Compiler available in a lower-level functional
+the Intel ISPC Program Compiler available in a lower-level functional
 units instead of parallelism through cores (OpenMP) and machines (MPI).
 
 The following files are contained within this submission:
@@ -24,3 +26,5 @@ In order to run our project run the following commands
     ./serial 1000 : run the optimized serial program with a high enough
         number of iterations for reliability
 
+DEPENDENCY:
+	there is a dependency on the ispc executable, but is included in the submission for linux systems. The makefile should take care of everything!
